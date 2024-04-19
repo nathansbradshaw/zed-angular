@@ -1,0 +1,15 @@
+id = "angular"
+name = "Angular"
+description = "Angular support"
+version = "0.0.1"
+schema_version = 1
+authors = []
+repository = "https://github.com/nathansbradshaw/zed_angular"
+
+[language_servers.angular-language-server]
+name = "Angular Language Server"
+language = "Angular"
+
+[grammars.angular]
+repository = "https://github.com/dlvandenberg/tree-sitter-angular"
+commit = "b7a7167762e3863b3d6247c708b7f9bca1ca7bea"
