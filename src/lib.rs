@@ -1,4 +1,7 @@
+use std::path::{self, PathBuf};
 use std::{env, fs};
+use zed::lsp::{Completion, CompletionKind};
+use zed::CodeLabelSpan;
 use zed_extension_api::{self as zed, serde_json, Result};
 
 struct AngularExtension {
@@ -6,7 +9,7 @@ struct AngularExtension {
 }
 
 const SERVER_PATH: &str = "node_modules/@angular/language-server/index.js";
-const PACKAGE_NAME: &str = "angular-language-server";
+const PACKAGE_NAME: &str = "@angular/language-server";
 
 impl AngularExtension {
     fn server_exists(&self) -> bool {
@@ -35,13 +38,18 @@ impl AngularExtension {
             let result = zed::npm_install_package(PACKAGE_NAME, &version);
             match result {
                 Ok(()) => {
+                    println!("PACKAGE INSTALLED CORRECTLY");
                     if !self.server_exists() {
                         Err(format!(
-                            "installed package '{PACKAGE_NAME}' did not contain expected path '{SERVER_PATH}'",
+                            "installed package {PACKAGE_NAME} did not contain expected path {SERVER_PATH}",
                         ))?;
                     }
                 }
                 Err(error) => {
+                    println!(
+                        "ERROR INSTALLING PACKAGE {} VERSION {} ",
+                        PACKAGE_NAME, &version
+                    );
                     if !self.server_exists() {
                         Err(error)?;
                     }
@@ -67,15 +75,28 @@ impl zed::Extension for AngularExtension {
         _: &zed::Worktree,
     ) -> Result<zed::Command> {
         let server_path = self.server_script_path(id)?;
+        let current_dir = env::current_dir().unwrap_or(PathBuf::new());
+        let full_path = current_dir.join(&server_path);
+        println!("_ANGULAR_ SERVER PATH {:?}", &server_path);
+        println!("BUFFER PATH {:?}", full_path);
+        println!(
+            "CURRENT PATH {}",
+            current_dir.join("node_modules").to_string_lossy()
+        );
+
         Ok(zed::Command {
             command: zed::node_binary_path()?,
             args: vec![
-                env::current_dir()
-                    .unwrap()
-                    .join(&server_path)
-                    .to_string_lossy()
-                    .to_string(),
+                full_path.to_string_lossy().to_string(),
                 "--stdio".to_string(),
+                format!(
+                    "--tsProbeLocations {}",
+                    current_dir.join("node_modules").to_string_lossy()
+                ),
+                format!(
+                    "--ngProbeLocations {}",
+                    current_dir.join("node_modules").to_string_lossy()
+                ),
             ],
             env: Default::default(),
         })
@@ -86,38 +107,46 @@ impl zed::Extension for AngularExtension {
         _: &zed::LanguageServerId,
         _: &zed::Worktree,
     ) -> Result<Option<serde_json::Value>> {
-        let config = serde_json::json!({
-          "inlayHints": {
-            "parameterNames": {
-              "enabled": "all",
-              "suppressWhenArgumentMatchesName": false
-            },
-            "parameterTypes": {
-              "enabled": true
-            },
-            "variableTypes": {
-              "enabled": true,
-              "suppressWhenTypeMatchesName": false
-            },
-            "propertyDeclarationTypes": {
-              "enabled": true
-            },
-            "functionLikeReturnType": {
-              "enabled": true
-            },
-            "enumMemberValues": {
-              "enabled": true
-            }
-          }
-        });
-
         Ok(Some(serde_json::json!({
-            "provideFormatter": true,
-            "configuration": {
-                "typescript": config,
-                "javascript": config
+            "typescript": {
+                "tsdk": "node_modules/typescript/lib"
             }
         })))
+    }
+
+    fn label_for_completion(
+        &self,
+        _language_server_id: &zed::LanguageServerId,
+        completion: Completion,
+    ) -> Option<zed::CodeLabel> {
+        let highlight_name = match completion.kind? {
+            CompletionKind::Class | CompletionKind::Interface => "type",
+            CompletionKind::Constructor => "type",
+            CompletionKind::Constant => "constant",
+            CompletionKind::Function | CompletionKind::Method => "function",
+            CompletionKind::Property | CompletionKind::Field => "tag",
+            CompletionKind::Variable => "type",
+            CompletionKind::Keyword => "keyword",
+            CompletionKind::Value => "tag",
+            _ => return None,
+        };
+
+        let len = completion.label.len();
+        let name_span = CodeLabelSpan::literal(completion.label, Some(highlight_name.to_string()));
+
+        Some(zed::CodeLabel {
+            code: Default::default(),
+            spans: if let Some(detail) = completion.detail {
+                vec![
+                    name_span,
+                    CodeLabelSpan::literal(" ", None),
+                    CodeLabelSpan::literal(detail, None),
+                ]
+            } else {
+                vec![name_span]
+            },
+            filter_range: (0..len).into(),
+        })
     }
 }
 
