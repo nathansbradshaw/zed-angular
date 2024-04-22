@@ -1,5 +1,6 @@
 name = "Angular"
 path_suffixes = ["ts", "html", "css", "scss"]
+grammar = "angular"
 
 # TypeScript comments
 line_comments = ["// ", "/// "]

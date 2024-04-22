@@ -36,43 +36,4 @@
 ((member_expression
   property: (identifier) @property))
 
-; Highlight types in declarations and type assertions
-((type_annotation
-  type: (identifier) @type)
- (as_expression
-  type: (identifier) @type))
 
-; Highlight decorators
-((decorator
-  (field_identifier) @decorator))
-
-; Special keywords and control flow
-("if" @keyword)
-("else" @keyword)
-("for" @keyword)
-("while" @keyword)
-("return" @keyword)
-
-; Operators
-("=" @operator)
-("+" @operator)
-("-" @operator)
-("==" @operator)
-("===" @operator)
-("&&" @operator)
-("||" @operator)
-
-; Brackets and punctuation
-("{" @punctuation.bracket)
-("}" @punctuation.bracket)
-("(" @punctuation.bracket)
-(")" @punctuation.bracket)
-("[" @punctuation.bracket)
-("]" @punctuation.bracket)
-("<" @punctuation.bracket)
-(">" @punctuation.bracket)
-("," @punctuation.delimiter)
-(";" @punctuation.delimiter)
-
-; Comments
-((comment) @comment)
