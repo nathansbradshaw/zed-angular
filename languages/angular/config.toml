@@ -7,9 +7,13 @@ block_comments = ["/*", "*/"]
 
 autoclose_before = ";:.,=}])>\"'"
 
-# Define brackets for TypeScript, HTML, CSS
+# Enhancements for Angular templates and TypeScript advanced features
+angular_bindings = ["[", "]", "(", ")", "[(", ")]"]
+angular_directives = ["*ngIf", "*ngFor", "*ngSwitch", "*ngClass", "*ngStyle"]
+
+# Define brackets for TypeScript, HTML, CSS, and SCSS with Angular specific extensions
 brackets = [
-    # TypeScript brackets
+    # TypeScript and Angular script sections in components
     { start = "{", end = "}", close = true, newline = true },
     { start = "[", end = "]", close = true, newline = false },
     { start = "(", end = ")", close = true, newline = false },
@@ -24,7 +28,7 @@ brackets = [
         "string",
     ] },
 
-    # HTML brackets
+    # HTML enhanced for Angular
     { start = "<", end = ">", close = true, newline = true, in = [
         "html",
     ] },
@@ -35,7 +39,18 @@ brackets = [
         "html",
     ] },
 
-    # CSS brackets
+
+    { start = "[", end = "]", close = true, newline = true, in = [
+        "html",
+    ] },
+    { start = "(", end = ")", close = true, newline = true, in = [
+        "html",
+    ] },
+    { start = "[(", end = ")]", close = true, newline = true, in = [
+        "html",
+    ] },
+
+    # CSS and SCSS
     { start = "{", end = "}", close = true, newline = true, in = [
         "css",
         "scss",
@@ -57,3 +72,19 @@ brackets = [
         "scss",
     ] },
 ]
+
+# Integration with other tools
+linting = ["eslint", "codelyzer"]
+formatting = ["prettier"]
+
+# Real-time features
+real_time_syntax_checking = true
+real_time_semantic_checking = true
+code_lens_features = ["references", "tests"]
+
+# Documentation and tooltips
+documentation = true
+hover_information = true
+
+# Plugin and extension support
+plugin_support = true

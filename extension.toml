@@ -4,7 +4,7 @@ description = "Angular Language support"
 version = "0.0.1"
 schema_version = 1
 authors = ["nathansbradshaw"]
-repository = "https://github.com/nathansbradshaw/zed_angular"
+repository = "https://github.com/nathansbradshaw/zed-angular"
 
 [language_servers.angular-language-server]
 name = "Angular Language Server"
