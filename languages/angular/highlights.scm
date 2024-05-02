@@ -37,3 +37,42 @@
   property: (identifier) @property))
 
 
+; Match property bindings
+((property_binding) @property-binding)
+
+; Match event bindings
+((event_binding) @event-binding)
+; Match interpolation expressions
+((interpolation) @interpolation)
+; Match script content
+((script_element (raw_text) @javascript)
+ (#set! "language" "javascript"))
+
+; Match style content
+((style_element (raw_text) @css)
+ (#set! "language" "css"))
+((tag_name) @html-tag)
+((self_closing_tag) @html-tag)
+((attribute_name) @attribute)
+;; Highlight Angular bindings specially
+((property_binding) @angular-binding)
+((event_binding) @angular-binding)
+((comment) @comment)
+((doctype) @doctype)
+((entity) @entity)
+(tag_name) @keyword
+(erroneous_end_tag_name) @keyword
+(doctype) @constant
+(attribute_name) @property
+(attribute_value) @string
+(comment) @comment
+
+"=" @operator
+
+[
+  "<"
+  ">"
+  "<!"
+  "</"
+  "/>"
+] @punctuation.bracket

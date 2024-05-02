@@ -2,6 +2,8 @@ name = "Angular"
 path_suffixes = ["ts", "html", "css", "scss"]
 grammar = "angular"
 
+scope_opt_in_language_servers = ["tailwindcss-language-server"]
+
 # TypeScript comments
 line_comments = ["// ", "/// "]
 block_comments = ["/*", "*/"]

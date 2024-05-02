@@ -13,3 +13,6 @@ language = "Angular"
 [grammars.angular]
 repository = "https://github.com/dlvandenberg/tree-sitter-angular"
 commit = "b7a7167762e3863b3d6247c708b7f9bca1ca7bea"
+
+[language_servers.vscode-angular-language-server]
+language = "Angular"
