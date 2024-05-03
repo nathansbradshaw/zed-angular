@@ -84,9 +84,13 @@ impl zed::Extension for AngularExtension {
             .to_string_lossy()
             .to_string();
         let ng_service_path = node_modules_path
-            .join("@angular/language-service")
+            .join("@angular/language-service/bin")
             .to_string_lossy()
             .to_string();
+        println!(
+            "command: {:?} --stdio --tsProbeLocations {:?} --ngProbeLocations {:?} ",
+            full_path_to_server, ts_lib_path, ng_service_path
+        );
 
         Ok(zed::Command {
             command: zed::node_binary_path()?,
@@ -131,7 +135,7 @@ impl zed::Extension for AngularExtension {
         _language_server_id: &zed::LanguageServerId,
         completion: Completion,
     ) -> Option<zed::CodeLabel> {
-        println!("Label for completion");
+        println!("Label for completion {:?}", completion.kind);
         let highlight_name = match completion.kind? {
             CompletionKind::Class | CompletionKind::Interface => "type",
             CompletionKind::Constructor => "type",

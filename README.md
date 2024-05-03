@@ -19,7 +19,7 @@ The angular LSP is very similar to the Vue lsp https://github.com/zed-industries
 
 TODO:
 
-- Find the TypeScript install
+- ~Find the TypeScript install~
 - Correctly identify angular projects
 - correct the SCM files
 - remove this todo list
