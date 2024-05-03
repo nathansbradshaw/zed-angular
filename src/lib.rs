@@ -119,7 +119,7 @@ impl zed::Extension for AngularExtension {
             .to_string();
         Ok(Some(serde_json::json!({
             "typescript": {
-                "tsdk": "node_modules/typescript/lib"
+                "tsdk": ts_lib_path,
             },
             "tsProbeLocations": ts_lib_path,
             "ngProbeLocations": ng_service_path,
@@ -137,10 +137,10 @@ impl zed::Extension for AngularExtension {
             CompletionKind::Constructor => "type",
             CompletionKind::Constant => "constant",
             CompletionKind::Function | CompletionKind::Method => "function",
-            CompletionKind::Property | CompletionKind::Field => "tag",
-            CompletionKind::Variable => "type",
+            CompletionKind::Property | CompletionKind::Field => "property",
+            CompletionKind::Variable => "variable",
             CompletionKind::Keyword => "keyword",
-            CompletionKind::Value => "tag",
+            CompletionKind::Value => "value",
             _ => return None,
         };
 
