@@ -1,6 +1,5 @@
 name = "Angular"
 path_suffixes = ["component.html", "component.ts"]
-path_regex = ".*component\\.(html|ts)$"
 grammar = "angular"
 
 scope_opt_in_language_servers = ["tailwindcss-language-server"]
