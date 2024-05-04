@@ -118,7 +118,7 @@ impl zed::Extension for AngularExtension {
             .to_string_lossy()
             .to_string();
         let ng_service_path = node_modules_path
-            .join("@angular/language-service")
+            .join("@angular/language-service/bin")
             .to_string_lossy()
             .to_string();
         Ok(Some(serde_json::json!({
