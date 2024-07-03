@@ -23,6 +23,7 @@ commit = "b7a7167762e3863b3d6247c708b7f9bca1ca7bea"
 
 [grammars.typescript]
 repository = "https://github.com/tree-sitter/tree-sitter-typescript"
+path = "typescript"
 commit = "5d20856f34315b068c41edaee2ac8a100081d259"
 
 [grammars.html]
