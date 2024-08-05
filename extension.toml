@@ -8,27 +8,12 @@ repository = "https://github.com/nathansbradshaw/zed-angular"
 
 [language_servers.angular]
 name = "Angular Language Server"
-language = "Angular"
-
-[language_servers.html]
-language = "HTML"
-
-[language_servers.typescript]
-language = "TypeScript"
-
+languages = ["TypeScript", "HTML"]
+language_ids = { "Angular" = "html" }
 
 [grammars.angular]
 repository = "https://github.com/dlvandenberg/tree-sitter-angular"
-commit = "b7a7167762e3863b3d6247c708b7f9bca1ca7bea"
-
-[grammars.typescript]
-repository = "https://github.com/tree-sitter/tree-sitter-typescript"
-path = "typescript"
-commit = "5d20856f34315b068c41edaee2ac8a100081d259"
-
-[grammars.html]
-repository = "https://github.com/tree-sitter/tree-sitter-html.git"
-commit = "e4d834eb4918df01dcad5c27d1b15d56e3bd94cd"
+commit = "31182d43b062a350d4bd2449f2fc0d5654972be9"
 
 [language_servers.vscode-angular-language-server]
 language = "Angular"
