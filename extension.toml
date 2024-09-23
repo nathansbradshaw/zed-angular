@@ -18,4 +18,4 @@ languages = ["Angular", "HTML", "TypeScript"]
 
 [grammars.angular]
 repository = "https://github.com/dlvandenberg/tree-sitter-angular"
-commit = "c473dbc54ca27f95d8928cfdb2a1a79300e16951"
+commit = "04736c7514212093fe7dbabeeec13b94be70af38"
