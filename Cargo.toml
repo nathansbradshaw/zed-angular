@@ -8,7 +8,9 @@ authors = ["nathansbradshaw"]
 
 
 [lib]
+path = "src/angular.rs"
 crate-type = ["cdylib"]
 
 [dependencies]
-zed_extension_api = "0.0.6"
+serde = { version = "1.0", features = ["derive"] }
+zed_extension_api = "0.1.0"
