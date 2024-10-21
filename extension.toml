@@ -7,6 +7,10 @@ authors = ["nathansbradshaw"]
 repository = "https://github.com/nathansbradshaw/zed-angular"
 path_suffixes = ["html"]
 
+[language_servers.ts]
+name = "typescript"
+languages = ["TypeScript", "HTML"]
+
 [language_servers.vscode-angular-language-server]
 name = "vscode-angular-language-server"
 languages = ["Angular", "HTML", "TypeScript"]
