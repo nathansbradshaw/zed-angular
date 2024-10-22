@@ -1,0 +1,55 @@
+name: Code Formatting Check
+
+on:
+  push:
+    branches:
+      - staging
+      - trying
+      - main
+  pull_request:
+    branches:
+      - staging
+      - trying
+      - main
+
+jobs:
+  fmt:
+    name: fmt and build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Set Up Rust Toolchain
+        uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: stable
+          override: true
+
+      - name: Cache Cargo registry
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+          key: ${{ runner.os }}-cargo-registry-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-registry-
+
+      - name: Cache Cargo build
+        uses: actions/cache@v3
+        with:
+          path: target
+          key: ${{ runner.os }}-cargo-build-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-build-
+
+      - name: Build
+        run: cargo build --verbose
+
+      - name: Install rustfmt
+        run: rustup component add rustfmt
+
+      - name: Check Formatting
+        run: cargo fmt -- --check
