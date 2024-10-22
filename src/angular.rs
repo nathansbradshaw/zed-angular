@@ -52,7 +52,6 @@ impl AngularExtension {
         );
 
         let version = zed::npm_package_latest_version(PACKAGE_NAME)?;
-        let ts_version = zed::npm_package_latest_version(TYPESCRIPT_PACKAGE_NAME)?;
 
         if !server_exists
             || zed::npm_package_installed_version(PACKAGE_NAME)?.as_ref() != Some(&version)
@@ -61,7 +60,7 @@ impl AngularExtension {
                 language_server_id,
                 &zed::LanguageServerInstallationStatus::Downloading,
             );
-            let result = zed::npm_install_package(PACKAGE_NAME, &ts_version);
+            let result = zed::npm_install_package(PACKAGE_NAME, &version);
             match result {
                 Ok(()) => {
                     if !self.server_exists() {
