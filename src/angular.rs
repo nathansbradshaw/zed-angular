@@ -51,34 +51,31 @@ impl AngularExtension {
             Ok(UserSettings::default())
         }
     }
-    fn server_exists(&self) -> bool {
-        fs::metadata(SERVER_PATH).map_or(false, |stat| stat.is_file())
+    fn file_exists_at_path(&self, path: &str) -> bool {
+        fs::metadata(path).map_or(false, |stat| stat.is_file())
     }
 
     fn server_script_path(&mut self, language_server_id: &zed::LanguageServerId) -> Result<String> {
-        let server_exists = self.server_exists();
         self.set_ng_service_path()?;
+        let server_exists = self.file_exists_at_path(&SERVER_PATH);
+
         if self.did_find_server && server_exists {
-            self.install_typescript()?;
-            return Ok(SERVER_PATH.to_string());
+            zed::set_language_server_installation_status(
+                language_server_id,
+                &zed::LanguageServerInstallationStatus::CheckingForUpdate,
+            );
+
+            // TODO only install new version if there are change
         }
-
-        zed::set_language_server_installation_status(
-            language_server_id,
-            &zed::LanguageServerInstallationStatus::CheckingForUpdate,
-        );
-
-        let version = zed::npm_package_latest_version(PACKAGE_NAME)?;
 
         zed::set_language_server_installation_status(
             language_server_id,
             &zed::LanguageServerInstallationStatus::Downloading,
         );
 
-        zed::npm_install_package(PACKAGE_NAME, &version)
-            .map_err(|error| format!("Failed to install package '{}': {}", PACKAGE_NAME, error))?;
+        self.install_packages()?;
 
-        if !self.server_exists() {
+        if !self.file_exists_at_path(&SERVER_PATH) {
             return Err(format!(
                 "Installed package '{}' did not contain expected path '{}'",
                 PACKAGE_NAME, SERVER_PATH
@@ -86,12 +83,11 @@ impl AngularExtension {
             .into());
         }
 
-        self.install_typescript()?;
         self.did_find_server = true;
         Ok(SERVER_PATH.to_string())
     }
 
-    fn install_typescript(&mut self) -> Result<()> {
+    fn install_packages(&mut self) -> Result<()> {
         let als_version = if self.angular_language_service_version == "latest" {
             zed::npm_package_latest_version(PACKAGE_NAME)?
         } else {
@@ -109,8 +105,10 @@ impl AngularExtension {
             PACKAGE_NAME, als_version, TYPESCRIPT_PACKAGE_NAME, ts_version
         );
 
-        zed::npm_install_package(PACKAGE_NAME, &als_version)?;
-        zed::npm_install_package(TYPESCRIPT_PACKAGE_NAME, &ts_version)?;
+        zed::npm_install_package(PACKAGE_NAME, &als_version)
+            .map_err(|error| format!("Failed to install package '{}': {}", PACKAGE_NAME, error))?;
+        zed::npm_install_package(TYPESCRIPT_PACKAGE_NAME, &ts_version)
+            .map_err(|error| format!("Failed to install package '{}': {}", PACKAGE_NAME, error))?;
 
         Ok(())
     }
