@@ -1,10 +1,10 @@
-# zed-angular
+# Zed Angular Extension
 
-## THIS IS STILL A WORK IN PROGRESS EXPECT BUGS!
+## Overview
 
-The Angular Language Service uses the same set of options that are used to compile the application.
-To get the most complete information in the editor, set the `strictTemplates` option in `tsconfig.json`,
-as shown in the following example:
+**Note: This project is currently a work in progress. Expect potential bugs or issues.**
+
+This extension integrates the Angular Language Service into Zed. It uses the same options that Angular applies during compilation. To ensure the most accurate information, enable the `strictTemplates` option in the `tsconfig.json` of the angular project  as shown in below:
 
 ```json
 "angularCompilerOptions": {
@@ -12,17 +12,32 @@ as shown in the following example:
 }
 ```
 
-## Versioning
+## Version Management
 
-The language service extension relies on the `@angular/language-service` and `typescript` packages
+The extension depends on `@angular/language-service` and `typescript` Node packages. By default, these versions are managed internally, but they can be customized using the following settings:
 
-for its backend. `@angular/language-service` is always bundled with the extension, and is always
-the latest version at the time of the release. This is managed by this extension.
-For more information, please see [#594](https://github.com/angular/vscode-ng-language-service/issues/594).
+```json
+{
+  "lsp": {
+    "angular": {
+      "initialization_options": {
+        "angular_language_service_version": "17.3.0",
+        "typescript_version": "5.3.2"
+      }
+    }
+  }
+}
+```
 
-## How to use
+Please ensure the versions of Angular and TypeScript are compatible to avoid issues.
 
-- Clone this repo locally
-- Open `Zed` extensions window
-- Click `Install Dev Extension`
-- Point to the location of the cloned repo.
+Refer to [Angular Version Compatibility](https://angular.dev/reference/versions#unsupported-angular-versions) for details. Mismatched versions may lead to bugs, so it is not recommended to use `latest` as a version, but it's also a valid option.  
+
+## Installation Instructions
+
+To install this extension locally:
+
+1. Clone this repository.
+2. Open the Zed editor and navigate to the Extensions window.
+3. Click on "Install Dev Extension."
+4. Select the cloned repository location and complete the installation.
