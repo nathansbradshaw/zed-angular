@@ -5,17 +5,14 @@ version = "0.0.1"
 schema_version = 1
 authors = ["nathansbradshaw"]
 repository = "https://github.com/nathansbradshaw/zed-angular"
-path_suffixes = ["html"]
+path_suffixes = ["html", "ts", "typescript"]
 
-[language_servers.ts]
-name = "typescript"
-languages = ["TypeScript", "HTML"]
+[language_servers.angular]
+name = "Angular Language Server"
+languages = ["TypeScript", "HTML", "Angular"]
+command = { extension = true }
 
-[language_servers.vscode-angular-language-server]
-name = "vscode-angular-language-server"
-languages = ["Angular", "HTML", "TypeScript"]
-
-[language_servers.vscode-angular-language-server.language_ids]
+[language_servers.angular.language_ids]
 "HTML" = "html"
 "TypeScript" = "typescript"
 "Angular" = "angular"

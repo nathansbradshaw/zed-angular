@@ -1,48 +1,65 @@
 use serde::Deserialize;
-use std::collections::HashMap;
 use std::path::PathBuf;
 use std::{env, fs};
 use zed::lsp::{Completion, CompletionKind};
+use zed::settings::LspSettings;
 use zed::CodeLabelSpan;
 use zed_extension_api::{self as zed, serde_json, Result};
 
-const SERVER_PATH: &str = "node_modules/@angular/language-server/index.js";
-const PACKAGE_NAME: &str = "@angular/language-server";
+// The Latest version of typescript isn't always compatible with angular see: https://angular.dev/reference/versions#unsupported-angular-versions
+const DEFAULT_ANGULAR_LANGUAGE_SERVICE_VERSION: &str = "18.2.0";
+const DEFAULT_TYPESCRIPT_VERSION: &str = "5.5.4";
 
+const SERVER_PATH: &str = "node_modules/@angular/language-server/index.js";
+
+const PACKAGE_NAME: &str = "@angular/language-server";
 const TYPESCRIPT_PACKAGE_NAME: &str = "typescript";
 
-/// The relative path to TypeScript's SDK.
 const TYPESCRIPT_TSDK_PATH: &str = "node_modules/typescript/lib";
+const NG_SERVICE_PATH: &str = "node_modules/@angular/language-service";
 
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
-struct PackageJson {
-    #[serde(default)]
-    dependencies: HashMap<String, String>,
-    #[serde(default)]
-    dev_dependencies: HashMap<String, String>,
+#[derive(Deserialize, Default)]
+struct UserSettings {
+    angular_language_service_version: Option<String>,
+    typescript_version: Option<String>,
 }
 
 struct AngularExtension {
     did_find_server: bool,
     typescript_tsdk_path: String,
+    ng_service_path: String,
+    angular_language_service_version: String,
+    typescript_version: String,
 }
 
 impl AngularExtension {
     #[allow(dead_code)]
     pub const LANGUAGE_SERVER_ID: &'static str = "angular";
 
+    fn read_user_settings(
+        &self,
+        language_server_name: &zed::LanguageServerId,
+        worktree: &zed::Worktree,
+    ) -> Result<UserSettings> {
+        let lsp_settings = LspSettings::for_worktree(&language_server_name.to_string(), worktree)?;
+
+        if let Some(options) = lsp_settings.initialization_options {
+            let user_settings: UserSettings = serde_json::from_value(options)
+                .map_err(|e| format!("Failed to parse initialization_options: {}", e))?;
+            Ok(user_settings)
+        } else {
+            Ok(UserSettings::default())
+        }
+    }
     fn server_exists(&self) -> bool {
         fs::metadata(SERVER_PATH).map_or(false, |stat| stat.is_file())
     }
-    fn server_script_path(
-        &mut self,
-        language_server_id: &zed::LanguageServerId,
-        worktree: &zed::Worktree,
-    ) -> Result<String> {
+
+    fn server_script_path(&mut self, language_server_id: &zed::LanguageServerId) -> Result<String> {
         let server_exists = self.server_exists();
+        self.set_ng_service_path()?;
         if self.did_find_server && server_exists {
-            self.install_typescript_if_needed(worktree)?;
+            self.install_typescript()?;
             return Ok(SERVER_PATH.to_string());
         }
 
@@ -53,84 +70,70 @@ impl AngularExtension {
 
         let version = zed::npm_package_latest_version(PACKAGE_NAME)?;
 
-        if !server_exists
-            || zed::npm_package_installed_version(PACKAGE_NAME)?.as_ref() != Some(&version)
-        {
-            zed::set_language_server_installation_status(
-                language_server_id,
-                &zed::LanguageServerInstallationStatus::Downloading,
-            );
-            let result = zed::npm_install_package(PACKAGE_NAME, &version);
-            match result {
-                Ok(()) => {
-                    if !self.server_exists() {
-                        Err(format!(
-                            "installed package '{PACKAGE_NAME}' did not contain expected path '{SERVER_PATH}'",
-                        ))?;
-                    }
-                }
-                Err(error) => {
-                    if !self.server_exists() {
-                        Err(error)?;
-                    }
-                }
-            }
+        zed::set_language_server_installation_status(
+            language_server_id,
+            &zed::LanguageServerInstallationStatus::Downloading,
+        );
+
+        zed::npm_install_package(PACKAGE_NAME, &version)
+            .map_err(|error| format!("Failed to install package '{}': {}", PACKAGE_NAME, error))?;
+
+        if !self.server_exists() {
+            return Err(format!(
+                "Installed package '{}' did not contain expected path '{}'",
+                PACKAGE_NAME, SERVER_PATH
+            )
+            .into());
         }
 
-        self.install_typescript_if_needed(worktree)?;
+        self.install_typescript()?;
         self.did_find_server = true;
         Ok(SERVER_PATH.to_string())
     }
 
-    fn typescript_exists_for_worktree(&self, worktree: &zed::Worktree) -> Result<bool> {
-        let package_json = worktree.read_text_file("package.json")?;
-        let package_json: PackageJson = serde_json::from_str(&package_json)
-            .map_err(|err| format!("failed to parse package.json: {err}"))?;
-
-        let dev_dependencies = &package_json.dev_dependencies;
-        let dependencies = &package_json.dependencies;
-
-        // Since the extension is not allowed to read the filesystem within the project
-        // except through the worktree (which does not contains `node_modules`), we check
-        // the `package.json` to see if `typescript` is listed in the dependencies.
-        Ok(dev_dependencies.contains_key(TYPESCRIPT_PACKAGE_NAME)
-            || dependencies.contains_key(TYPESCRIPT_PACKAGE_NAME))
-    }
-
-    fn install_typescript_if_needed(&mut self, worktree: &zed::Worktree) -> Result<()> {
-        if self
-            .typescript_exists_for_worktree(worktree)
-            .unwrap_or_default()
-        {
-            println!("found local TypeScript installation at '{TYPESCRIPT_TSDK_PATH}'");
-            return Ok(());
-        }
-
-        let installed_typescript_version =
-            zed::npm_package_installed_version(TYPESCRIPT_PACKAGE_NAME)?;
-        let latest_typescript_version = zed::npm_package_latest_version(TYPESCRIPT_PACKAGE_NAME)?;
-
-        if installed_typescript_version.as_ref() != Some(&latest_typescript_version) {
-            println!("installing {TYPESCRIPT_PACKAGE_NAME}@{latest_typescript_version}");
-            zed::npm_install_package(TYPESCRIPT_PACKAGE_NAME, &latest_typescript_version)?;
+    fn install_typescript(&mut self) -> Result<()> {
+        let als_version = if self.angular_language_service_version == "latest" {
+            zed::npm_package_latest_version(PACKAGE_NAME)?
         } else {
-            println!("typescript already installed");
-        }
+            self.angular_language_service_version.clone()
+        };
 
-        self.typescript_tsdk_path = env::current_dir()
-            .unwrap()
-            .join(TYPESCRIPT_TSDK_PATH)
-            .to_string_lossy()
-            .to_string();
+        let ts_version = if self.typescript_version == "latest" {
+            zed::npm_package_latest_version(TYPESCRIPT_PACKAGE_NAME)?
+        } else {
+            self.typescript_version.clone()
+        };
+
+        println!(
+            "Installing {}@{}, {}@{}",
+            PACKAGE_NAME, als_version, TYPESCRIPT_PACKAGE_NAME, ts_version
+        );
+
+        zed::npm_install_package(PACKAGE_NAME, &als_version)?;
+        zed::npm_install_package(TYPESCRIPT_PACKAGE_NAME, &ts_version)?;
 
         Ok(())
     }
+
+    fn set_ng_service_path(&mut self) -> Result<()> {
+        let current_dir =
+            env::current_dir().map_err(|e| format!("Failed to get current directory: {}", e))?;
+        self.ng_service_path = current_dir
+            .join("node_modules/@angular/language-service/bin")
+            .to_string_lossy()
+            .to_string();
+        Ok(())
+    }
 }
+
 impl zed::Extension for AngularExtension {
     fn new() -> Self {
         Self {
             did_find_server: false,
             typescript_tsdk_path: TYPESCRIPT_TSDK_PATH.to_owned(),
+            ng_service_path: NG_SERVICE_PATH.to_owned(),
+            angular_language_service_version: DEFAULT_ANGULAR_LANGUAGE_SERVICE_VERSION.to_owned(),
+            typescript_version: DEFAULT_TYPESCRIPT_VERSION.to_owned(),
         }
     }
 
@@ -139,30 +142,32 @@ impl zed::Extension for AngularExtension {
         language_server_id: &zed::LanguageServerId,
         worktree: &zed::Worktree,
     ) -> Result<zed::Command> {
-        let server_path = self.server_script_path(language_server_id, worktree)?;
+        let user_settings = self.read_user_settings(language_server_id, worktree)?;
 
+        if let Some(version) = user_settings.angular_language_service_version {
+            self.angular_language_service_version = version;
+        }
+
+        if let Some(version) = user_settings.typescript_version {
+            self.typescript_version = version;
+        }
+
+        let server_path = self.server_script_path(language_server_id)?;
         let current_dir = env::current_dir().unwrap_or(PathBuf::new());
         let full_path_to_server = current_dir.join(&server_path);
-        let node_modules_path = current_dir.join("node_modules");
-        let ts_lib_path = node_modules_path
-            .join("typescript/lib")
-            .to_string_lossy()
-            .to_string();
-        let ng_service_path = node_modules_path
-            .join("@angular/language-service/bin")
-            .to_string_lossy()
-            .to_string();
+
+        let args = vec![
+            full_path_to_server.to_string_lossy().to_string(),
+            "--stdio".to_string(),
+            "--tsProbeLocations".to_string(),
+            self.typescript_tsdk_path.clone(),
+            "--ngProbeLocations".to_string(),
+            self.ng_service_path.clone(),
+        ];
 
         Ok(zed::Command {
             command: zed::node_binary_path()?,
-            args: vec![
-                full_path_to_server.to_string_lossy().to_string(),
-                "--stdio".to_string(),
-                "--tsProbeLocations".to_string(),
-                ts_lib_path,
-                "--ngProbeLocations".to_string(),
-                ng_service_path,
-            ],
+            args,
             env: Default::default(),
         })
     }
@@ -172,23 +177,13 @@ impl zed::Extension for AngularExtension {
         _language_server_id: &zed::LanguageServerId,
         _worktree: &zed::Worktree,
     ) -> Result<Option<serde_json::Value>> {
-        let current_dir = env::current_dir().unwrap_or(PathBuf::new());
-        let node_modules_path = current_dir.join("node_modules");
-        let ts_lib_path = node_modules_path
-            .join("typescript/lib")
-            .to_string_lossy()
-            .to_string();
-        let ng_service_path = node_modules_path
-            .join("@angular/language-service/bin")
-            .to_string_lossy()
-            .to_string();
-        Ok(Some(serde_json::json!({
+        let options = serde_json::json!({
             "typescript": {
-                "tsdk": ts_lib_path,
+                "tsdk": self.typescript_tsdk_path,
             },
-            "tsProbeLocations": ts_lib_path,
-            "ngProbeLocations": ng_service_path,
-        })))
+            "ngProbeLocations": self.ng_service_path,
+        });
+        Ok(Some(options))
     }
 
     fn label_for_completion(
@@ -199,30 +194,33 @@ impl zed::Extension for AngularExtension {
         println!("Label for completion {:?}", completion.kind);
         let highlight_name = match completion.kind? {
             CompletionKind::Class | CompletionKind::Interface => "type",
-            CompletionKind::Constructor => "type",
+            CompletionKind::Constructor => "constructor",
             CompletionKind::Constant => "constant",
             CompletionKind::Function | CompletionKind::Method => "function",
-            CompletionKind::Property | CompletionKind::Field => "tag",
-            CompletionKind::Variable => "type",
+            CompletionKind::Property | CompletionKind::Field => "property",
+            CompletionKind::Variable => "variable",
             CompletionKind::Keyword => "keyword",
-            CompletionKind::Value => "tag",
+            CompletionKind::Enum => "enum",
+            CompletionKind::Module => "module",
             _ => return None,
         };
 
         let len = completion.label.len();
         let name_span = CodeLabelSpan::literal(completion.label, Some(highlight_name.to_string()));
 
+        let spans = if let Some(detail) = completion.detail {
+            vec![
+                name_span,
+                CodeLabelSpan::literal(" ", None),
+                CodeLabelSpan::literal(detail, Some("detail".to_string())),
+            ]
+        } else {
+            vec![name_span]
+        };
+
         Some(zed::CodeLabel {
             code: Default::default(),
-            spans: if let Some(detail) = completion.detail {
-                vec![
-                    name_span,
-                    CodeLabelSpan::literal(" ", None),
-                    CodeLabelSpan::literal(detail, None),
-                ]
-            } else {
-                vec![name_span]
-            },
+            spans,
             filter_range: (0..len).into(),
         })
     }
