@@ -112,6 +112,12 @@ impl AngularExtension {
         zed::npm_install_package(PACKAGE_NAME, &als_version)?;
         zed::npm_install_package(TYPESCRIPT_PACKAGE_NAME, &ts_version)?;
 
+        self.typescript_tsdk_path = env::current_dir()
+            .unwrap()
+            .join(TYPESCRIPT_TSDK_PATH)
+            .to_string_lossy()
+            .to_string();
+
         Ok(())
     }
 
@@ -181,6 +187,7 @@ impl zed::Extension for AngularExtension {
             "typescript": {
                 "tsdk": self.typescript_tsdk_path,
             },
+            "tsProbeLocations": self.typescript_tsdk_path,
             "ngProbeLocations": self.ng_service_path,
         });
         Ok(Some(options))

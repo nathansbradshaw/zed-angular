@@ -1,9 +1,9 @@
 id = "angular"
 name = "Angular"
 description = "Angular Language support"
-version = "0.0.1"
+version = "0.0.2"
 schema_version = 1
-authors = ["nathansbradshaw"]
+authors = ["nathansbradshaw", "J Rui Pinto <linkedin.com/in/j-rui-pinto>"]
 repository = "https://github.com/nathansbradshaw/zed-angular"
 path_suffixes = ["html", "ts", "typescript"]
 
