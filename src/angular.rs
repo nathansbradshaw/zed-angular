@@ -16,7 +16,6 @@ const TYPESCRIPT_TSDK_PATH: &str = "node_modules/typescript/lib";
 const ANGULAR_SERVER_PACKAGE_NAME: &str = "@angular/language-server";
 const TYPESCRIPT_PACKAGE_NAME: &str = "typescript";
 
-
 #[derive(Deserialize, Default)]
 struct UserSettings {
     angular_language_service_version: Option<String>,
@@ -101,10 +100,18 @@ impl AngularExtension {
             ANGULAR_SERVER_PACKAGE_NAME, als_version, TYPESCRIPT_PACKAGE_NAME, ts_version
         );
 
-        zed::npm_install_package(ANGULAR_SERVER_PACKAGE_NAME, &als_version)
-            .map_err(|error| format!("Failed to install package '{}': {}", ANGULAR_SERVER_PACKAGE_NAME, error))?;
-        zed::npm_install_package(TYPESCRIPT_PACKAGE_NAME, &ts_version)
-            .map_err(|error| format!("Failed to install package '{}': {}", ANGULAR_SERVER_PACKAGE_NAME, error))?;
+        zed::npm_install_package(ANGULAR_SERVER_PACKAGE_NAME, &als_version).map_err(|error| {
+            format!(
+                "Failed to install package '{}': {}",
+                ANGULAR_SERVER_PACKAGE_NAME, error
+            )
+        })?;
+        zed::npm_install_package(TYPESCRIPT_PACKAGE_NAME, &ts_version).map_err(|error| {
+            format!(
+                "Failed to install package '{}': {}",
+                ANGULAR_SERVER_PACKAGE_NAME, error
+            )
+        })?;
 
         Ok(())
     }
