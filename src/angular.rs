@@ -100,12 +100,14 @@ impl AngularExtension {
             ANGULAR_LANGUAGE_SERVER_PACKAGE_NAME, als_version, TYPESCRIPT_PACKAGE_NAME, ts_version
         );
 
-        zed::npm_install_package(ANGULAR_LANGUAGE_SERVER_PACKAGE_NAME, &als_version).map_err(|error| {
-            format!(
-                "Failed to install package '{}': {}",
-                ANGULAR_LANGUAGE_SERVER_PACKAGE_NAME, error
-            )
-        })?;
+        zed::npm_install_package(ANGULAR_LANGUAGE_SERVER_PACKAGE_NAME, &als_version).map_err(
+            |error| {
+                format!(
+                    "Failed to install package '{}': {}",
+                    ANGULAR_LANGUAGE_SERVER_PACKAGE_NAME, error
+                )
+            },
+        )?;
         zed::npm_install_package(TYPESCRIPT_PACKAGE_NAME, &ts_version).map_err(|error| {
             format!(
                 "Failed to install package '{}': {}",
