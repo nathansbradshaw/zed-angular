@@ -21,7 +21,7 @@ The extension depends on `@angular/language-service` and `typescript` Node packa
   "lsp": {
     "angular": {
       "initialization_options": {
-        "angular_language_service_version": "17.3.0",
+        "angular_language_server_version": "17.3.0",
         "typescript_version": "5.3.2"
       }
     }

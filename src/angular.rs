@@ -7,24 +7,24 @@ use zed::CodeLabelSpan;
 use zed_extension_api::{self as zed, serde_json, Result};
 
 // The Latest version of typescript isn't always compatible with angular see: https://angular.dev/reference/versions#unsupported-angular-versions
-const DEFAULT_ANGULAR_LANGUAGE_SERVICE_VERSION: &str = "18.2.0";
-const DEFAULT_TYPESCRIPT_VERSION: &str = "5.5.4";
+const DEFAULT_ANGULAR_LANGUAGE_SERVER_VERSION: &str = "19.0.4";
+const DEFAULT_TYPESCRIPT_VERSION: &str = "5.7.3";
 
 const SERVER_PATH: &str = "node_modules/@angular/language-server/index.js";
 const TYPESCRIPT_TSDK_PATH: &str = "node_modules/typescript/lib";
 
-const ANGULAR_SERVER_PACKAGE_NAME: &str = "@angular/language-server";
+const ANGULAR_LANGUAGE_SERVER_PACKAGE_NAME: &str = "@angular/language-server";
 const TYPESCRIPT_PACKAGE_NAME: &str = "typescript";
 
 #[derive(Deserialize, Default)]
 struct UserSettings {
-    angular_language_service_version: Option<String>,
+    angular_language_server_version: Option<String>,
     typescript_version: Option<String>,
 }
 
 struct AngularExtension {
     did_find_server: bool,
-    angular_language_service_version: String,
+    angular_language_server_version: String,
     typescript_version: String,
 }
 
@@ -73,7 +73,7 @@ impl AngularExtension {
         if !self.file_exists_at_path(&SERVER_PATH) {
             return Err(format!(
                 "Installed package '{}' did not contain expected path '{}'",
-                ANGULAR_SERVER_PACKAGE_NAME, SERVER_PATH
+                ANGULAR_LANGUAGE_SERVER_PACKAGE_NAME, SERVER_PATH
             )
             .into());
         }
@@ -83,10 +83,10 @@ impl AngularExtension {
     }
 
     fn install_packages(&mut self) -> Result<()> {
-        let als_version = if self.angular_language_service_version == "latest" {
-            zed::npm_package_latest_version(ANGULAR_SERVER_PACKAGE_NAME)?
+        let als_version = if self.angular_language_server_version == "latest" {
+            zed::npm_package_latest_version(ANGULAR_LANGUAGE_SERVER_PACKAGE_NAME)?
         } else {
-            self.angular_language_service_version.clone()
+            self.angular_language_server_version.clone()
         };
 
         let ts_version = if self.typescript_version == "latest" {
@@ -97,19 +97,19 @@ impl AngularExtension {
 
         println!(
             "Installing {}@{}, {}@{}",
-            ANGULAR_SERVER_PACKAGE_NAME, als_version, TYPESCRIPT_PACKAGE_NAME, ts_version
+            ANGULAR_LANGUAGE_SERVER_PACKAGE_NAME, als_version, TYPESCRIPT_PACKAGE_NAME, ts_version
         );
 
-        zed::npm_install_package(ANGULAR_SERVER_PACKAGE_NAME, &als_version).map_err(|error| {
+        zed::npm_install_package(ANGULAR_LANGUAGE_SERVER_PACKAGE_NAME, &als_version).map_err(|error| {
             format!(
                 "Failed to install package '{}': {}",
-                ANGULAR_SERVER_PACKAGE_NAME, error
+                ANGULAR_LANGUAGE_SERVER_PACKAGE_NAME, error
             )
         })?;
         zed::npm_install_package(TYPESCRIPT_PACKAGE_NAME, &ts_version).map_err(|error| {
             format!(
                 "Failed to install package '{}': {}",
-                ANGULAR_SERVER_PACKAGE_NAME, error
+                TYPESCRIPT_PACKAGE_NAME, error
             )
         })?;
 
@@ -153,7 +153,7 @@ impl zed::Extension for AngularExtension {
     fn new() -> Self {
         Self {
             did_find_server: false,
-            angular_language_service_version: DEFAULT_ANGULAR_LANGUAGE_SERVICE_VERSION.to_owned(),
+            angular_language_server_version: DEFAULT_ANGULAR_LANGUAGE_SERVER_VERSION.to_owned(),
             typescript_version: DEFAULT_TYPESCRIPT_VERSION.to_owned(),
         }
     }
@@ -165,8 +165,8 @@ impl zed::Extension for AngularExtension {
     ) -> Result<zed::Command> {
         let user_settings = self.read_user_settings(language_server_id, worktree)?;
 
-        if let Some(version) = user_settings.angular_language_service_version {
-            self.angular_language_service_version = version;
+        if let Some(version) = user_settings.angular_language_server_version {
+            self.angular_language_server_version = version;
         }
 
         if let Some(version) = user_settings.typescript_version {
