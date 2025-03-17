@@ -5,18 +5,13 @@ version = "0.0.1"
 schema_version = 1
 authors = ["nathansbradshaw"]
 repository = "https://github.com/nathansbradshaw/zed-angular"
-path_suffixes = ["html", "ts", "typescript"]
+path_suffixes = ["html", "ng.html"]
 
 [language_servers.angular]
 name = "Angular Language Server"
-languages = ["TypeScript", "HTML", "Angular"]
-command = { extension = true }
-
-[language_servers.angular.language_ids]
-"HTML" = "html"
-"TypeScript" = "typescript"
-"Angular" = "angular"
+language = "Angular"
+language_ids = { "Angular" = "angular" }
 
 [grammars.angular]
 repository = "https://github.com/dlvandenberg/tree-sitter-angular"
-commit = "04736c7514212093fe7dbabeeec13b94be70af38"
+commit = "cba288924f4832abb619c627539f111004ff22e5"
