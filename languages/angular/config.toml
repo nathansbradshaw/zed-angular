@@ -1,19 +1,11 @@
 name = "Angular"
-path_suffixes = ["component.html", "component.ts"]
 grammar = "angular"
+path_suffixes = ["component.html", "ng.html"]
+block_comment = ["<!-- ", " -->"]
+autoclose_before = ";:.,=}])>\"'"
+prettier_parser_name = "angular"
 
 scope_opt_in_language_servers = ["tailwindcss-language-server"]
-
-
-# TypeScript comments
-line_comments = ["// ", "/// "]
-block_comments = ["/*", "*/"]
-
-autoclose_before = ";:.,=}])>\"'"
-
-# Enhancements for Angular templates and TypeScript advanced features
-angular_bindings = ["[", "]", "(", ")", "[(", ")]"]
-angular_directives = ["*ngIf", "*ngFor", "*ngSwitch", "*ngClass", "*ngStyle"]
 
 # Define brackets for TypeScript, HTML, CSS, and SCSS with Angular specific extensions
 brackets = [
@@ -31,49 +23,8 @@ brackets = [
     { start = "'", end = "'", close = true, newline = false, not_in = [
         "string",
     ] },
-
-    # HTML enhanced for Angular
-    { start = "<", end = ">", close = true, newline = true, in = [
-        "html",
-    ] },
-    { start = "\"", end = "\"", close = true, newline = false, in = [
-        "html",
-    ] },
-    { start = "'", end = "'", close = true, newline = false, in = [
-        "html",
-    ] },
-
-
-    { start = "[", end = "]", close = true, newline = true, in = [
-        "html",
-    ] },
-    { start = "(", end = ")", close = true, newline = true, in = [
-        "html",
-    ] },
-    { start = "[(", end = ")]", close = true, newline = true, in = [
-        "html",
-    ] },
-
-    # CSS and SCSS
-    { start = "{", end = "}", close = true, newline = true, in = [
-        "css",
-        "scss",
-    ] },
-    { start = "(", end = ")", close = true, newline = false, in = [
-        "css",
-        "scss",
-    ] },
-    { start = "[", end = "]", close = true, newline = false, in = [
-        "css",
-        "scss",
-    ] },
-    { start = "\"", end = "\"", close = true, newline = false, in = [
-        "css",
-        "scss",
-    ] },
-    { start = "'", end = "'", close = true, newline = false, in = [
-        "css",
-        "scss",
+    { start = "`", end = "`", close = true, newline = false, not_in = [
+        "string",
     ] },
 ]
 

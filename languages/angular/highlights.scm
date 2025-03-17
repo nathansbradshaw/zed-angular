@@ -1,5 +1,24 @@
-; Highlight variable and function identifiers
+; Match style content
+((style_element (raw_text) @css)
+ (#set! "language" "css"))
+((tag_name) @html-tag)
+((self_closing_tag) @html-tag)
+((attribute_name) @attribute)
+
+; Highlight Angular bindings, variable and function identifiers
 ((identifier) @variable)
+((property_binding) @angular-binding)
+((event_binding) @angular-binding)
+((comment) @comment)
+((doctype) @doctype)
+((entity) @entity)
+(tag_name) @tag
+(erroneous_end_tag_name) @keyword
+(doctype) @constant
+(attribute_name) @property
+(attribute_value) @string
+(comment) @comment
+; (raw_text) @embedded
 
 ;; Angular control flow
 (control_keyword) @keyword.control
@@ -75,35 +94,16 @@
 ((event_binding) @event-binding)
 
 ; Match interpolation expressions
-((interpolation) @interpolation)
+((interpolation) @punctuation.special)
 
 ; Match script content
 ((script_element (raw_text) @javascript)
  (#set! "language" "javascript"))
 
  ; Ensure variables in expressions are highlighted
-(expression 
+(expression
   (identifier) @variable)
 
-; Match style content
-((style_element (raw_text) @css)
- (#set! "language" "css"))
-((tag_name) @html-tag)
-((self_closing_tag) @html-tag)
-((attribute_name) @attribute)
-
-;; Highlight Angular bindings specially
-((property_binding) @angular-binding)
-((event_binding) @angular-binding)
-((comment) @comment)
-((doctype) @doctype)
-((entity) @entity)
-(tag_name) @tag
-(erroneous_end_tag_name) @keyword
-(doctype) @constant
-(attribute_name) @property
-(attribute_value) @string
-(comment) @comment
 
 "=" @operator
 "@" @keyword.special
