@@ -1,11 +1,10 @@
 [package]
 name = "zed_angular"
-version = "0.0.1"
+version = "0.0.2"
 edition = "2021"
 publish = false
 license = "MIT"
 authors = ["nathansbradshaw"]
-
 
 [lib]
 path = "src/angular.rs"
