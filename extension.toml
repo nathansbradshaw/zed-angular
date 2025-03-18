@@ -9,8 +9,9 @@ path_suffixes = ["html", "ng.html"]
 
 [language_servers.angular]
 name = "Angular Language Server"
-language = "Angular"
-language_ids = { "Angular" = "angular" }
+languages = ["TypeScript", "HTML", "Angular"]
+language_ids = { "Angular" = "angular", "HTML" = "html", "TypeScript" = "typescript" }
+command = { extension = true }
 
 [grammars.angular]
 repository = "https://github.com/dlvandenberg/tree-sitter-angular"
