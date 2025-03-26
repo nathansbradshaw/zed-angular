@@ -178,7 +178,7 @@ impl zed::Extension for AngularExtension {
         let server_path = self.server_script_path(language_server_id)?;
         let current_dir = env::current_dir().unwrap_or(PathBuf::new());
         let full_path_to_server = current_dir.join(&server_path);
-        
+
         // we will apply a patch the downloaded angular server code.
         // this will force the LSP to return both angular and typescript definitions.
         // the user gets full LSP functionality on angular files, as well as typescript files in general.
