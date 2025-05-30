@@ -37,8 +37,7 @@ real_time_syntax_checking = true
 real_time_semantic_checking = true
 code_lens_features = ["references", "tests"]
 
-# Documentation and tooltips
-documentation = true
+# tooltips
 hover_information = true
 
 # Plugin and extension support
