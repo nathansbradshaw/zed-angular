@@ -15,4 +15,4 @@ command = { extension = true }
 
 [grammars.angular]
 repository = "https://github.com/dlvandenberg/tree-sitter-angular"
-commit = "15590fdaf2edbd33e5883b22c844eef545320fc5"
+commit = "de892c1c1eee4eb844502ac58c6f2591c33a2fc9"
