@@ -120,3 +120,17 @@
 ;; Angular tags highlights
 ((tag_name) @type
   (#match? @type ".*-.*"))
+
+; --- Angular Template String Highlighting ---
+
+; Highlight the static text parts of the template string.
+(template_chars) @string
+
+; Highlight the interpolation markers: ${ and }
+(template_substitution
+  "${" @punctuation.special
+  "}" @punctuation.special)
+
+; Highlight the variable name inside the interpolation.
+(expression
+  (identifier) @variable)
