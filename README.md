@@ -51,7 +51,16 @@ To install this extension locally:
     },
     "HTML": {
       "language_servers": ["angular", "..."]
+    },
+    "Angular": {
+      "language_servers": ["angular", "tailwindcss-language-server", "..."]
     }
   }
 }
 ```
+
+## Tailwind CSS Support
+
+This version includes a fix for Tailwind CSS autocomplete in Angular template files. The Angular language now correctly maps to HTML for language server communication, enabling Tailwind CSS IntelliSense to work in both `.component.html` files and inline templates.
+
+To enable Tailwind CSS support, add the configuration above to your `settings.json`, ensuring the Angular language includes both the `angular` and `tailwindcss-language-server` language servers.

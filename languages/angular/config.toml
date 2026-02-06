@@ -5,7 +5,6 @@ block_comment = ["<!-- ", " -->"]
 autoclose_before = ";:.,=}])>\"'"
 prettier_parser_name = "angular"
 
-scope_opt_in_language_servers = ["tailwindcss-language-server"]
 
 # Define brackets for TypeScript, HTML, CSS, and SCSS with Angular specific extensions
 brackets = [
