@@ -5,3 +5,7 @@
 (element
   (start_tag) @start
   (end_tag)? @end) @indent
+
+; Angular control flow blocks (@if, @for, @switch, @defer, etc.)
+(statement_block "{" "}" @end) @indent
+(switch_body "{" "}" @end) @indent
