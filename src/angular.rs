@@ -7,8 +7,8 @@ use zed::CodeLabelSpan;
 use zed_extension_api::{self as zed, serde_json, Result};
 
 // The Latest version of typescript isn't always compatible with angular see: https://angular.dev/reference/versions#unsupported-angular-versions
-const DEFAULT_ANGULAR_LANGUAGE_SERVER_VERSION: &str = "19.0.4";
-const DEFAULT_TYPESCRIPT_VERSION: &str = "5.7.3";
+const DEFAULT_ANGULAR_LANGUAGE_SERVER_VERSION: &str = "21.1.5";
+const DEFAULT_TYPESCRIPT_VERSION: &str = "5.9.3";
 
 const SERVER_PATH: &str = "node_modules/@angular/language-server/index.js";
 const TYPESCRIPT_TSDK_PATH: &str = "node_modules/typescript/lib";
