@@ -198,6 +198,30 @@ impl zed::Extension for AngularExtension {
         })
     }
 
+    fn language_server_initialization_options(
+        &mut self,
+        _language_server_id: &zed::LanguageServerId,
+        worktree: &zed::Worktree,
+    ) -> Result<Option<serde_json::Value>> {
+        let initialization_options = LspSettings::for_worktree(Self::LANGUAGE_SERVER_ID, worktree)
+            .ok()
+            .and_then(|settings| settings.initialization_options)
+            .unwrap_or_else(|| serde_json::json!({}));
+        Ok(Some(initialization_options))
+    }
+
+    fn language_server_workspace_configuration(
+        &mut self,
+        _language_server_id: &zed::LanguageServerId,
+        worktree: &zed::Worktree,
+    ) -> Result<Option<serde_json::Value>> {
+        let settings = LspSettings::for_worktree(Self::LANGUAGE_SERVER_ID, worktree)
+            .ok()
+            .and_then(|settings| settings.settings)
+            .unwrap_or_else(|| serde_json::json!({}));
+        Ok(Some(settings))
+    }
+
     fn label_for_completion(
         &self,
         _language_server_id: &zed::LanguageServerId,
