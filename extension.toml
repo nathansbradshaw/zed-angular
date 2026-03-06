@@ -10,7 +10,7 @@ path_suffixes = ["html", "ng.html"]
 [language_servers.angular]
 name = "Angular Language Server"
 languages = ["TypeScript", "HTML", "Angular"]
-language_ids = { "Angular" = "angular", "HTML" = "html", "TypeScript" = "typescript" }
+language_ids = { "Angular" = "html", "HTML" = "html", "TypeScript" = "typescript" }
 command = { extension = true }
 
 [grammars.angular]
