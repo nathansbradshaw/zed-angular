@@ -55,12 +55,7 @@ impl AngularExtension {
         let server_exists = self.file_exists_at_path(&SERVER_PATH);
 
         if self.did_find_server && server_exists {
-            zed::set_language_server_installation_status(
-                language_server_id,
-                &zed::LanguageServerInstallationStatus::CheckingForUpdate,
-            );
-
-            // TODO only install new version if there are change
+            return Ok(SERVER_PATH.to_string());
         }
 
         zed::set_language_server_installation_status(
@@ -122,7 +117,7 @@ impl AngularExtension {
         env::current_dir().map_err(|e| format!("Failed to get current directory: {}", e))
     }
 
-    fn get_ng_probe_locations(worktree: Option<&zed::Worktree>) -> Vec<String> {
+    fn get_ng_probe_locations(worktree: Option<&zed::Worktree>) -> String {
         let mut paths = vec![];
 
         if let Ok(path) = Self::get_current_dir() {
@@ -133,10 +128,10 @@ impl AngularExtension {
             paths.push(worktree.root_path());
         }
 
-        paths
+        paths.join(",")
     }
 
-    fn get_ts_probe_locations(worktree: Option<&zed::Worktree>) -> Vec<String> {
+    fn get_ts_probe_locations(worktree: Option<&zed::Worktree>) -> String {
         let mut paths = vec![];
 
         if let Ok(path) = Self::get_current_dir() {
@@ -147,7 +142,7 @@ impl AngularExtension {
             paths.push(worktree.root_path());
         }
 
-        paths
+        paths.join(",")
     }
 }
 
@@ -183,13 +178,14 @@ impl zed::Extension for AngularExtension {
         args.push("--stdio".to_string());
 
         args.push("--tsProbeLocations".to_string());
-        args.extend(Self::get_ts_probe_locations(Some(worktree)));
+        args.push(Self::get_ts_probe_locations(Some(worktree)));
 
         args.push("--ngProbeLocations".to_string());
-        args.extend(Self::get_ng_probe_locations(Some(worktree)));
+        args.push(Self::get_ng_probe_locations(Some(worktree)));
 
+        let tsdk_path = current_dir.join(TYPESCRIPT_TSDK_PATH);
         args.push("--tsdk".to_string());
-        args.push(TYPESCRIPT_TSDK_PATH.to_string());
+        args.push(tsdk_path.to_string_lossy().to_string());
 
         Ok(zed::Command {
             command: zed::node_binary_path()?,
