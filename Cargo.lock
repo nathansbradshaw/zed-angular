@@ -731,7 +731,7 @@ dependencies = [
 
 [[package]]
 name = "zed_angular"
-version = "0.0.4"
+version = "0.0.5"
 dependencies = [
  "serde",
  "zed_extension_api",

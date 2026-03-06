@@ -22,6 +22,11 @@ struct UserSettings {
     typescript_version: Option<String>,
 }
 
+#[derive(Deserialize)]
+struct PackageJson {
+    version: String,
+}
+
 struct AngularExtension {
     did_find_server: bool,
     angular_language_server_version: String,
@@ -52,23 +57,12 @@ impl AngularExtension {
     }
 
     fn server_script_path(&mut self, language_server_id: &zed::LanguageServerId) -> Result<String> {
-        let server_exists = self.file_exists_at_path(&SERVER_PATH);
-
-        if self.did_find_server && server_exists {
-            zed::set_language_server_installation_status(
-                language_server_id,
-                &zed::LanguageServerInstallationStatus::CheckingForUpdate,
-            );
-
-            // TODO only install new version if there are change
-        }
-
         zed::set_language_server_installation_status(
             language_server_id,
-            &zed::LanguageServerInstallationStatus::Downloading,
+            &zed::LanguageServerInstallationStatus::CheckingForUpdate,
         );
 
-        self.install_packages()?;
+        self.ensure_packages_installed(language_server_id)?;
 
         if !self.file_exists_at_path(&SERVER_PATH) {
             return Err(format!(
@@ -82,7 +76,22 @@ impl AngularExtension {
         Ok(SERVER_PATH.to_string())
     }
 
-    fn install_packages(&mut self) -> Result<()> {
+    fn get_installed_version(&self, package_name: &str) -> Option<String> {
+        let current_dir = Self::get_current_dir().ok()?;
+        let package_json_path = current_dir
+            .join("node_modules")
+            .join(package_name)
+            .join("package.json");
+
+        let file = fs::File::open(package_json_path).ok()?;
+        let package_json: PackageJson = serde_json::from_reader(file).ok()?;
+        Some(package_json.version)
+    }
+
+    fn ensure_packages_installed(
+        &mut self,
+        language_server_id: &zed::LanguageServerId,
+    ) -> Result<()> {
         let als_version = if self.angular_language_server_version == "latest" {
             zed::npm_package_latest_version(ANGULAR_LANGUAGE_SERVER_PACKAGE_NAME)?
         } else {
@@ -95,25 +104,44 @@ impl AngularExtension {
             self.typescript_version.clone()
         };
 
-        println!(
-            "Installing {}@{}, {}@{}",
-            ANGULAR_LANGUAGE_SERVER_PACKAGE_NAME, als_version, TYPESCRIPT_PACKAGE_NAME, ts_version
-        );
+        let installed_als_version =
+            self.get_installed_version(ANGULAR_LANGUAGE_SERVER_PACKAGE_NAME);
+        let installed_ts_version = self.get_installed_version(TYPESCRIPT_PACKAGE_NAME);
 
-        zed::npm_install_package(ANGULAR_LANGUAGE_SERVER_PACKAGE_NAME, &als_version).map_err(
-            |error| {
+        if installed_als_version.as_deref() != Some(als_version.as_str())
+            || !self.file_exists_at_path(SERVER_PATH)
+        {
+            zed::set_language_server_installation_status(
+                language_server_id,
+                &zed::LanguageServerInstallationStatus::Downloading,
+            );
+            println!(
+                "Installing {}@{}",
+                ANGULAR_LANGUAGE_SERVER_PACKAGE_NAME, als_version
+            );
+            zed::npm_install_package(ANGULAR_LANGUAGE_SERVER_PACKAGE_NAME, &als_version).map_err(
+                |error| {
+                    format!(
+                        "Failed to install package '{}': {}",
+                        ANGULAR_LANGUAGE_SERVER_PACKAGE_NAME, error
+                    )
+                },
+            )?;
+        }
+
+        if installed_ts_version.as_deref() != Some(ts_version.as_str()) {
+            zed::set_language_server_installation_status(
+                language_server_id,
+                &zed::LanguageServerInstallationStatus::Downloading,
+            );
+            println!("Installing {}@{}", TYPESCRIPT_PACKAGE_NAME, ts_version);
+            zed::npm_install_package(TYPESCRIPT_PACKAGE_NAME, &ts_version).map_err(|error| {
                 format!(
                     "Failed to install package '{}': {}",
-                    ANGULAR_LANGUAGE_SERVER_PACKAGE_NAME, error
+                    TYPESCRIPT_PACKAGE_NAME, error
                 )
-            },
-        )?;
-        zed::npm_install_package(TYPESCRIPT_PACKAGE_NAME, &ts_version).map_err(|error| {
-            format!(
-                "Failed to install package '{}': {}",
-                TYPESCRIPT_PACKAGE_NAME, error
-            )
-        })?;
+            })?;
+        }
 
         Ok(())
     }
