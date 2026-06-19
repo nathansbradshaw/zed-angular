@@ -1,7 +1,7 @@
 id = "angular"
 name = "Angular"
-description = "Angular Language support"
-version = "0.0.5"
+description = "Angular Language support with project-aware version auto-detection"
+version = "0.1.0"
 schema_version = 1
 authors = ["nathansbradshaw"]
 repository = "https://github.com/nathansbradshaw/zed-angular"
