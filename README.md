@@ -2,8 +2,6 @@
 
 ## Overview
 
-**Note: This project is currently a work in progress. Expect potential bugs or issues.**
-
 This extension integrates the Angular Language Service into Zed. It uses the same options that Angular applies during compilation. To ensure the most accurate information, enable the `strictTemplates` option in the `tsconfig.json` of the angular project as shown in below:
 
 ```json
@@ -14,7 +12,11 @@ This extension integrates the Angular Language Service into Zed. It uses the sam
 
 ## Requirements
 
-The extension does not bundle or download a language server. It runs the copy of `@angular/language-server` installed in your project, using the Node binary managed by Zed. Install it alongside `typescript` as dev dependencies:
+**This extension does not bundle or download a language server. **
+
+**Why?** the version of the angular language server is sensitive to your project's angular version. A misalignment between them can create all kinds of unexpected problems. If this extension were to maintain its own copy, it's almost guaranteeing that it will be a problem (this is especially the case for people who are maintaining multiple angular applications).
+
+Therefore, this extension will look for and run the copy of `@angular/language-server` installed in your project. Install it alongside `typescript` as dev dependencies:
 
 ```sh
 npm install --save-dev @angular/language-server typescript
