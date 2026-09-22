@@ -27,3 +27,5 @@ brackets = [
         "string",
     ] },
 ]
+[overrides.string]
+opt_into_language_servers = ["tailwindcss-language-server"]
